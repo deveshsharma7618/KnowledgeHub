@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -60,7 +61,9 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails, String type) {
         final String username = extractUsername(token);
         final Claims claims = extractAllClaims(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token) && claims.get("type") == type;
+        return username.equals(userDetails.getUsername())
+                && !isTokenExpired(token)
+                && Objects.equals(claims.get("type", String.class), type);
     }
 
 
