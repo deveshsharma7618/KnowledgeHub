@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "refresh_tokens")
 /**
  * Persistent hashed refresh-token metadata for a user session.
  */
+@Entity
+@Table(name = "refresh_tokens")
 public class RefreshToken {
 
     @Id

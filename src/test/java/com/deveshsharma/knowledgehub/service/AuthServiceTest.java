@@ -109,16 +109,6 @@ class AuthServiceTest {
         assertThrows(InvalidCreditionals.class, () -> authService.login(request));
     }
 
-    /**
-     * Verifies the service delegates user listing to the repository.
-     */
-    @Test
-    void getAllUserReturnsRepositoryUsers() {
-        List<User> users = List.of(User.builder().email("one@example.com").build());
-        when(userRepository.findAll()).thenReturn(users);
-
-        assertEquals(users, authService.getAllUser());
-    }
 
     /**
      * Builds a registration request for service tests.

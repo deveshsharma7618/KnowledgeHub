@@ -11,11 +11,11 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "documents")
 /**
  * Persistent metadata for a document uploaded to a workspace.
  */
+@Entity
+@Table(name = "documents")
 @Getter
 @Setter
 @Builder

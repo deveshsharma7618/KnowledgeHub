@@ -16,64 +16,63 @@ import java.util.Collections;
  */
 public record CustomUserDetails(User user) implements UserDetails {
 
-    @Override
     /**
      * Returns the single application role assigned to authenticated users.
      *
      * @return collection containing {@code ROLE_USER}
      */
+    @Override
     @NonNull
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
-
-    @Override
     /**
      * Returns the password value exposed to Spring Security.
      *
      * @return an empty value because password verification occurs in the service
      */
+    @Override
     public String getPassword() {
         return "";
     }
 
-    @Override
     /**
      * Returns the user's unique login identifier.
      *
      * @return user email
      */
+    @Override
     @NonNull
     public String getUsername() {
         return user.getEmail();
     }
 
-    @Override
     /**
      * Reports whether the account status permits authentication.
      *
      * @return {@code true} only for active users
      */
+    @Override
     public boolean isAccountNonExpired() {
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
-    @Override
     /**
      * Reports whether the account is not locked.
      *
      * @return {@code true} only for active users
      */
+    @Override
     public boolean isAccountNonLocked() {
         return user.getStatus() == UserStatus.ACTIVE;
     }
 
-    @Override
     /**
      * Reports whether the account is enabled.
      *
      * @return {@code true} only for active users
      */
+    @Override
     public boolean isEnabled() {
         return user.getStatus() == UserStatus.ACTIVE;
     }

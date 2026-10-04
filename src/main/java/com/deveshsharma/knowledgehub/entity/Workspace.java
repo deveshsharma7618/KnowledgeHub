@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "workspaces")
 /**
  * Persistent workspace metadata and ownership information.
  */
+@Entity
+@Table(name = "workspaces")
 public class Workspace {
 
     @Id

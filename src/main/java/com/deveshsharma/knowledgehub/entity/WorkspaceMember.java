@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 
+
+/**
+ * Associates a user with a workspace and their workspace role.
+ */
 @Entity
 @Table(
         name = "workspace_members",
@@ -16,9 +20,6 @@ import java.util.UUID;
                 )
         }
 )
-/**
- * Associates a user with a workspace and their workspace role.
- */
 public class WorkspaceMember {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

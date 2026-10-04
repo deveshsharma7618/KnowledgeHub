@@ -16,10 +16,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
 /**
  * Extracts bearer tokens and establishes authenticated request context.
  */
+@Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -36,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
     /**
      * Processes a request's bearer token before protected controllers run.
      *
@@ -46,6 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
      * @throws ServletException when request processing fails
      * @throws IOException when request or response I/O fails
      */
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {

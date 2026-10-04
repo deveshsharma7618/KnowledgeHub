@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-@Service
 /**
  * Creates and validates signed access and refresh JWTs.
  */
+@Service
 public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
@@ -50,18 +50,6 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-
-    /**
-     * Generates a token using the supplied expiration duration.
-     *
-     * @param extraClaims additional JWT claims
-     * @param userDetails token subject details
-     * @param expirationTime token lifetime in milliseconds
-     * @return signed JWT
-     */
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expirationTime) {
-        return buildToken(extraClaims, userDetails, expirationTime);
-    }
 
     /**
      * Generates a token marked as an access token.

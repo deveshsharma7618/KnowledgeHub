@@ -6,10 +6,10 @@ import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
 /**
  * Configures the metadata exposed by the generated OpenAPI document.
  */
+@Configuration
 public class OpenApiConfig {
 
     /**

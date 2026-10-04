@@ -12,15 +12,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Persistent account and lifecycle state for a KnowledgeHub user.
+ */
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
-/**
- * Persistent account and lifecycle state for a KnowledgeHub user.
- */
 public class User {
 
     @Id

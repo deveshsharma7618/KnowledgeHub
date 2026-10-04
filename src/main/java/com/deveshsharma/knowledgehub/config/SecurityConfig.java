@@ -17,18 +17,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
 /**
  * Configures stateless JWT authentication and public API routes.
  */
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig<JwtAuthenticationFilter> {
 
     private final JwtFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
-    @Bean
     /**
      * Builds the HTTP security filter chain.
      *
@@ -36,6 +35,7 @@ public class SecurityConfig<JwtAuthenticationFilter> {
      * @return configured stateless security chain
      * @throws Exception if the security configuration cannot be built
      */
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -52,24 +52,24 @@ public class SecurityConfig<JwtAuthenticationFilter> {
         return http.build();
     }
 
-    @Bean
     /**
      * Creates the DAO authentication provider backed by the application user store.
      *
      * @return configured authentication provider
      */
+    @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
         return authProvider;
     }
 
-    @Bean
     /**
      * Creates the password encoder used for password hashing and verification.
      *
      * @return Argon2 password encoder
      */
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }

@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
-@Getter
 /**
  * User details submitted to the registration endpoint.
  */
+@Getter
 public class SignUpRequest {
     @NotEmpty(
             message = "Name can't be empty."

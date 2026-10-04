@@ -10,12 +10,11 @@ import com.deveshsharma.knowledgehub.exception.exceptions.UserAlreadyExistsExcep
 import com.deveshsharma.knowledgehub.repository.UserRepository;
 import com.deveshsharma.knowledgehub.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,16 +66,7 @@ public class AuthService {
 
         userRepository.save(newUser);
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        CustomUserDetails  customUserDetails = new CustomUserDetails(newUser);
-
-        String accessToken = jwtService.generateAccessToken(extraClaims, customUserDetails );
-        String refreshToken = jwtService.generateRefreshToken(extraClaims, customUserDetails );
-
-        return new AuthResponse(
-                accessToken,
-                refreshToken
-        );
+        return getAuthResponse(newUser);
     }
 
     /**
@@ -93,19 +83,29 @@ public class AuthService {
             throw new InvalidCreditionals();
         }else{
             if( passwordEncoder.matches(loginRequest.getPassword(), savedUser.getPasswordHash()) ){
-                Map<String, Object> extraClaims = new HashMap<>();
-                CustomUserDetails  customUserDetails = new CustomUserDetails(savedUser);
-
-                String accessToken = jwtService.generateAccessToken(extraClaims, customUserDetails );
-                String refreshToken = jwtService.generateRefreshToken(extraClaims, customUserDetails );
-
-                return new AuthResponse(
-                        accessToken,
-                        refreshToken
-                );
+                return getAuthResponse(savedUser);
             }
         }
         throw new InvalidCreditionals();
+    }
+
+    /**
+     * It returns refresh token and access token in AuthResponse
+     * @param savedUser {@link User}
+     * @return {@link AuthResponse}
+     */
+    @NonNull
+    private AuthResponse getAuthResponse(User savedUser) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        CustomUserDetails customUserDetails = new CustomUserDetails(savedUser);
+
+        String accessToken = jwtService.generateAccessToken(extraClaims, customUserDetails );
+        String refreshToken = jwtService.generateRefreshToken(extraClaims, customUserDetails );
+
+        return new AuthResponse(
+                accessToken,
+                refreshToken
+        );
     }
 
 }
