@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implements user registration, login, and user listing use cases.
+ */
 @Service
 public class AuthService {
 
@@ -25,12 +28,26 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    /**
+     * Creates the authentication service.
+     *
+     * @param userRepository user persistence gateway
+     * @param passwordEncoder password hashing and verification component
+     * @param jwtService JWT issuance component
+     */
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
+    /**
+     * Registers a user, persists the account, and issues both JWTs.
+     *
+     * @param signUpRequest registration details
+     * @return access and refresh tokens
+     * @throws UserAlreadyExistsException when the email is already registered
+     */
     @Transactional
     public AuthResponse signup(SignUpRequest signUpRequest) {
 
@@ -62,6 +79,13 @@ public class AuthService {
         );
     }
 
+    /**
+     * Authenticates credentials and issues both JWTs.
+     *
+     * @param loginRequest login credentials
+     * @return access and refresh tokens
+     * @throws InvalidCreditionals when the user does not exist or the password is incorrect
+     */
     public AuthResponse login(LoginRequest loginRequest)
     {
         User savedUser = userRepository.findByEmail(loginRequest.getEmail());
@@ -84,7 +108,4 @@ public class AuthService {
         throw new InvalidCreditionals();
     }
 
-    public List<User> getAllUser() {
-        return userRepository.findAll();
-    }
 }

@@ -7,8 +7,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+/**
+ * Configures the metadata exposed by the generated OpenAPI document.
+ */
 public class OpenApiConfig {
 
+    /**
+     * Creates the application OpenAPI definition.
+     *
+     * @return OpenAPI metadata for KnowledgeHub
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()

@@ -7,6 +7,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Getter
+/**
+ * Standard error payload returned by the REST exception handler.
+ */
 public class ErrorResponse {
     String title;
     int status;

@@ -18,6 +18,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Data
+/**
+ * Persistent account and lifecycle state for a KnowledgeHub user.
+ */
 public class User {
 
     @Id
@@ -44,4 +47,3 @@ public class User {
     @UpdateTimestamp
     private Instant updatedAt;
 }
-

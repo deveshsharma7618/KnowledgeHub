@@ -20,12 +20,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+/**
+ * Configures stateless JWT authentication and public API routes.
+ */
 public class SecurityConfig<JwtAuthenticationFilter> {
 
     private final JwtFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
     @Bean
+    /**
+     * Builds the HTTP security filter chain.
+     *
+     * @param http Spring Security HTTP configuration
+     * @return configured stateless security chain
+     * @throws Exception if the security configuration cannot be built
+     */
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -43,6 +53,11 @@ public class SecurityConfig<JwtAuthenticationFilter> {
     }
 
     @Bean
+    /**
+     * Creates the DAO authentication provider backed by the application user store.
+     *
+     * @return configured authentication provider
+     */
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
@@ -50,6 +65,11 @@ public class SecurityConfig<JwtAuthenticationFilter> {
     }
 
     @Bean
+    /**
+     * Creates the password encoder used for password hashing and verification.
+     *
+     * @return Argon2 password encoder
+     */
     public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }

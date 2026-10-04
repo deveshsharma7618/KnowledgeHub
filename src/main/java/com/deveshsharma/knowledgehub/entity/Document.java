@@ -2,12 +2,25 @@ package com.deveshsharma.knowledgehub.entity;
 
 import com.deveshsharma.knowledgehub.entity.enums.DocumentStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "documents")
+/**
+ * Persistent metadata for a document uploaded to a workspace.
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Document {
 
     @Id
@@ -41,4 +54,3 @@ public class Document {
 
     private Instant updatedAt;
 }
-

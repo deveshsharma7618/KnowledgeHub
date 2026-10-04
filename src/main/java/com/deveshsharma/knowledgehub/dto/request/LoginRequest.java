@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 
 @Getter
+/**
+ * Credentials submitted to the login endpoint.
+ */
 public class LoginRequest {
     @Email
     private String email;
