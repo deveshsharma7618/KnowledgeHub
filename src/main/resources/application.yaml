@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: KnowledgeHub
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/KnowledgeHub
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+
+jwt:
+  secret: e7c7LrR11XwFnzPcuA0B4su450F4BU6nBJ2uDl4xRmE
+  access-expiration-time: 900000
+  refresh-expiration-time: 86400000
