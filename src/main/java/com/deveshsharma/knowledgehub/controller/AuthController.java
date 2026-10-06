@@ -2,6 +2,7 @@ package com.deveshsharma.knowledgehub.controller;
 
 import com.deveshsharma.knowledgehub.dto.request.LoginRequest;
 import com.deveshsharma.knowledgehub.dto.request.SignUpRequest;
+import com.deveshsharma.knowledgehub.dto.request.RefreshTokenRequest;
 import com.deveshsharma.knowledgehub.dto.response.AuthResponse;
 import com.deveshsharma.knowledgehub.dto.response.ErrorResponse;
 import com.deveshsharma.knowledgehub.service.AuthService;
@@ -76,6 +77,31 @@ public class AuthController {
             @RequestBody LoginRequest loginRequest
     ) {
         return authService.login(loginRequest);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh tokens", description = "Rotates the supplied refresh token and revokes the current access token.")
+    @ApiResponse(responseCode = "200", description = "New authentication tokens returned")
+    @ApiResponse(responseCode = "401", description = "Invalid, expired, or revoked refresh token",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @SecurityRequirements
+    public AuthResponse refresh(
+            @Valid @RequestBody RefreshTokenRequest request,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        return authService.refresh(request.getRefreshToken(), authorizationHeader);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Log out", description = "Revokes the supplied refresh token and access token.")
+    @ApiResponse(responseCode = "204", description = "Logged out successfully")
+    @ApiResponse(responseCode = "401", description = "Invalid refresh token",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @SecurityRequirements
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(
+            @Valid @RequestBody RefreshTokenRequest request,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        authService.logout(request.getRefreshToken(), authorizationHeader);
     }
 
 }

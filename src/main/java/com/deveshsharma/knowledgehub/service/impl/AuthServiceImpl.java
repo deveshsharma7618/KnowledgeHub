@@ -8,6 +8,7 @@ import com.deveshsharma.knowledgehub.entity.User;
 import com.deveshsharma.knowledgehub.entity.enums.UserStatus;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidCreditionals;
 import com.deveshsharma.knowledgehub.exception.exceptions.UserAlreadyExistsException;
+import com.deveshsharma.knowledgehub.exception.exceptions.InvalidRefreshTokenException;
 import com.deveshsharma.knowledgehub.repository.RefreshTokenRepository;
 import com.deveshsharma.knowledgehub.repository.UserRepository;
 import com.deveshsharma.knowledgehub.security.CustomUserDetails;
@@ -26,7 +27,7 @@ import java.time.Instant;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * Implements user registration, login, and user listing use cases.
+ * Implements user registration, login, and refresh, logout use cases.
  */
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -42,9 +43,11 @@ public class AuthServiceImpl implements AuthService {
      * Creates the authentication service.
      *
      * @param userRepository user persistence gateway
+     * @param refreshTokenRepository refresh token persistence gateway
      * @param passwordEncoder password hashing and verification component
      * @param redisTemplate Redis template for adding data in cache
      * @param jwtService JWT issuance component
+     * @param tokenHashService for hashing token
      */
     public AuthServiceImpl(UserRepository userRepository,
                            RefreshTokenRepository refreshTokenRepository,
@@ -87,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
 
         newUser = userRepository.save(newUser);
 
-        return getAuthResponse(newUser);
+        return issueTokens(newUser);
     }
 
     /**
@@ -106,19 +109,30 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCreditionals();
         }else{
             if( passwordEncoder.matches(loginRequest.getPassword(), savedUser.getPasswordHash()) ){
-                return getAuthResponse(savedUser);
+                return issueTokens(savedUser);
             }
         }
         throw new InvalidCreditionals();
     }
 
-    /**
-     * It returns refresh token and access token in AuthResponse
-     * @param savedUser {@link User}
-     * @return {@link AuthResponse}
-     */
+    @Transactional
+    @Override
+    public AuthResponse refresh(String refreshToken, String accessToken) {
+        User user = validateRefreshToken(refreshToken);
+        revokeRefreshToken(refreshToken);
+        revokeAccessToken(accessToken);
+        return issueTokens(user);
+    }
+
+    @Transactional
+    @Override
+    public void logout(String refreshToken, String accessToken) {
+        revokeRefreshToken(refreshToken);
+        revokeAccessToken(accessToken);
+    }
+
     @NonNull
-    private AuthResponse getAuthResponse(User savedUser) {
+    private AuthResponse issueTokens(User savedUser) {
         Map<String, Object> extraClaims = new HashMap<>();
         CustomUserDetails customUserDetails = new CustomUserDetails(savedUser);
 
@@ -126,7 +140,6 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(extraClaims, customUserDetails );
 
         Instant now = Instant.now();
-        refreshTokenRepository.revokeActiveTokens(savedUser.getId(), now);
         refreshTokenRepository.save(RefreshToken.builder()
                 .userId(savedUser.getId())
                 .tokenHash(tokenHashService.hash(refreshToken))
@@ -145,6 +158,43 @@ public class AuthServiceImpl implements AuthService {
                 accessToken,
                 refreshToken
         );
+    }
+
+    private User validateRefreshToken(String refreshToken) {
+        try {
+            String tokenHash = tokenHashService.hash(refreshToken);
+            RefreshToken savedToken = refreshTokenRepository.findByTokenHashAndRevokedAtIsNull(tokenHash)
+                    .orElseThrow(InvalidRefreshTokenException::new);
+            if (savedToken.getExpiresAt().isBefore(Instant.now())) {
+                throw new InvalidRefreshTokenException();
+            }
+            User user = userRepository.findById(savedToken.getUserId())
+                    .orElseThrow(InvalidRefreshTokenException::new);
+            if (!jwtService.isTokenValid(refreshToken, new CustomUserDetails(user), "refresh_token")) {
+                throw new InvalidRefreshTokenException();
+            }
+            return user;
+        } catch (InvalidRefreshTokenException ex) {
+            throw ex;
+        } catch (RuntimeException ex) {
+            throw new InvalidRefreshTokenException(ex);
+        }
+    }
+
+    private void revokeRefreshToken(String refreshToken) {
+        RefreshToken savedToken = refreshTokenRepository
+                .findByTokenHashAndRevokedAtIsNull(tokenHashService.hash(refreshToken))
+                .orElseThrow(InvalidRefreshTokenException::new);
+        savedToken.setRevokedAt(Instant.now());
+        refreshTokenRepository.save(savedToken);
+    }
+
+    private void revokeAccessToken(String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            return;
+        }
+        String token = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        redisTemplate.delete("access-token:" + tokenHashService.hash(token));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.deveshsharma.knowledgehub.service.impl;
 
 
+import com.deveshsharma.knowledgehub.constants.JwtConstants;
 import com.deveshsharma.knowledgehub.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -61,7 +62,7 @@ public class JwtService implements JwtTokenService {
      * @return signed access JWT
      */
     public String generateAccessToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        extraClaims.put("type", "access_token");
+        extraClaims.put(JwtConstants.TOKEN_TYPE, JwtConstants.ACCESS_TOKEN);
         return buildToken(extraClaims, userDetails, accessExpirationTime);
     }
 
@@ -73,7 +74,7 @@ public class JwtService implements JwtTokenService {
      * @return signed refresh JWT
      */
     public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        extraClaims.put("type", "refresh_token");
+        extraClaims.put(JwtConstants.TOKEN_TYPE, JwtConstants.REFRESH_TOKEN);
         return buildToken(extraClaims, userDetails, refreshExpirationTime);
     }
 
@@ -108,7 +109,7 @@ public class JwtService implements JwtTokenService {
         final Claims claims = extractAllClaims(token);
         return username.equals(userDetails.getUsername())
                 && !isTokenExpired(token)
-                && Objects.equals(claims.get("type", String.class), type);
+                && Objects.equals(claims.get(JwtConstants.TOKEN_TYPE, String.class), type);
     }
 
 

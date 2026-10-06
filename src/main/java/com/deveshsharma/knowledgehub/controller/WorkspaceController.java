@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,9 +38,32 @@ public class WorkspaceController {
     @ApiResponse(responseCode = "401", description = "Invalid or expired access token",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<WorkspaceResponse> createWorkspace(@RequestBody CreateWorkspaceRequest createWorkspaceRequest) {
+    public ResponseEntity<WorkspaceResponse> createWorkspace(@Valid @RequestBody CreateWorkspaceRequest createWorkspaceRequest) {
         workspaceService.create(createWorkspaceRequest);
-        return new ResponseEntity<WorkspaceResponse>(new WorkspaceResponse("Workspace created succesfully."), HttpStatus.CREATED);
+        return new ResponseEntity<>(new WorkspaceResponse("Workspace created succesfully."), HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public List<com.deveshsharma.knowledgehub.dto.response.WorkspaceDetailsResponse> listWorkspaces() {
+        return workspaceService.findMine();
+    }
+
+    @GetMapping("/{workspaceId}")
+    public com.deveshsharma.knowledgehub.dto.response.WorkspaceDetailsResponse getWorkspace(
+            @PathVariable UUID workspaceId) {
+        return workspaceService.find(workspaceId);
+    }
+
+    @PutMapping("/{workspaceId}")
+    public com.deveshsharma.knowledgehub.dto.response.WorkspaceDetailsResponse updateWorkspace(
+            @PathVariable UUID workspaceId, @Valid @RequestBody com.deveshsharma.knowledgehub.dto.request.UpdateWorkspaceRequest request) {
+        return workspaceService.update(workspaceId, request);
+    }
+
+    @DeleteMapping("/{workspaceId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteWorkspace(@PathVariable UUID workspaceId) {
+        workspaceService.delete(workspaceId);
     }
 
     @PostMapping("/{workspaceId}/documents")
@@ -54,6 +80,24 @@ public class WorkspaceController {
     ) throws Exception {
         documentService.addDocument(workspaceId, document);
         return "Document uploaded!";
+    }
+
+    @GetMapping("/{workspaceId}/documents")
+    public java.util.List<com.deveshsharma.knowledgehub.dto.response.DocumentResponse> listDocuments(
+            @PathVariable UUID workspaceId) {
+        return documentService.findByWorkspace(workspaceId);
+    }
+
+    @GetMapping("/{workspaceId}/documents/{documentId}")
+    public com.deveshsharma.knowledgehub.dto.response.DocumentResponse getDocument(
+            @PathVariable UUID workspaceId, @PathVariable UUID documentId) {
+        return documentService.find(workspaceId, documentId);
+    }
+
+    @DeleteMapping("/{workspaceId}/documents/{documentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDocument(@PathVariable UUID workspaceId, @PathVariable UUID documentId) throws Exception {
+        documentService.delete(workspaceId, documentId);
     }
 
 }

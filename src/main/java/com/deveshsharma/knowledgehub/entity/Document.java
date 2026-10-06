@@ -37,6 +37,9 @@ public class Document {
     @Column(nullable = false)
     private String filename;
 
+    @Column(unique = true)
+    private String storageKey;
+
     @Column(nullable = false)
     private String contentType;
 

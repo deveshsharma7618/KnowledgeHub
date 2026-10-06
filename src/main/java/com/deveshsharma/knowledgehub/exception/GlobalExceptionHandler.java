@@ -4,6 +4,9 @@ import com.deveshsharma.knowledgehub.dto.response.ErrorResponse;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidCreditionals;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidAccessTokenException;
 import com.deveshsharma.knowledgehub.exception.exceptions.UserAlreadyExistsException;
+import com.deveshsharma.knowledgehub.exception.exceptions.ResourceNotFoundException;
+import com.deveshsharma.knowledgehub.exception.exceptions.ForbiddenOperationException;
+import com.deveshsharma.knowledgehub.exception.exceptions.InvalidRefreshTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -82,6 +85,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong");
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Not found", HttpStatus.NOT_FOUND.value(), ex.getMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenOperationException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Forbidden", HttpStatus.FORBIDDEN.value(), ex.getMessage()),
+                HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Invalid request", HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        return new ResponseEntity<>(new ErrorResponse("Invalid refresh token", HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
 

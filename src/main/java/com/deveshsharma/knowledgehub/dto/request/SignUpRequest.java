@@ -11,18 +11,18 @@ import lombok.Getter;
 @Getter
 public class SignUpRequest {
     @NotEmpty(
-            message = "Name can't be empty."
+            message = "Name can't be empty. "
     )
     String name;
 
     @Email(
-            message = "Invalid email."
+            message = "Invalid email. "
     )
     String email;
 
     @Pattern(
             regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
-            message = "Password must contain at least one letter, one number, and one special character, and be 8+ characters long."
+            message = "Password must contain at least one letter, one number, and one special character, and be 8+ characters long. "
     )
     String password;
 }
