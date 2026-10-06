@@ -42,7 +42,8 @@ public class SecurityConfig<JwtAuthenticationFilter> {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Public endpoints
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->

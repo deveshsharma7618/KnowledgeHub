@@ -1,6 +1,7 @@
-package com.deveshsharma.knowledgehub.service;
+package com.deveshsharma.knowledgehub.service.impl;
 
 
+import com.deveshsharma.knowledgehub.service.JwtTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -17,7 +19,7 @@ import java.util.function.Function;
  * Creates and validates signed access and refresh JWTs.
  */
 @Service
-public class JwtService {
+public class JwtService implements JwtTokenService {
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -109,6 +111,7 @@ public class JwtService {
                 && Objects.equals(claims.get("type", String.class), type);
     }
 
+
     /**
      * Checks whether a token's expiration date is before the current time.
      *
@@ -116,7 +119,7 @@ public class JwtService {
      * @return whether the token has expired
      */
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractExpiration(token).isBefore(Instant.now());
     }
 
     /**
@@ -125,8 +128,8 @@ public class JwtService {
      * @param token signed JWT
      * @return token expiration timestamp
      */
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public Instant extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration).toInstant();
     }
 
     /**

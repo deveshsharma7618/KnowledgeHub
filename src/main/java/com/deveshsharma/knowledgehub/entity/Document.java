@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,14 +43,13 @@ public class Document {
     @Column(nullable = false)
     private Long fileSize;
 
-    @Column(nullable = false)
-    private String storagePath;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DocumentStatus status;
 
     @Column(nullable = false, updatable = false)
+    @CreationTimestamp
     private Instant createdAt;
 
     private Instant updatedAt;

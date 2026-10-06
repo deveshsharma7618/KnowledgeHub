@@ -29,3 +29,15 @@ jwt:
   secret: e7c7LrR11XwFnzPcuA0B4su450F4BU6nBJ2uDl4xRmE
   access-expiration-time: 900000
   refresh-expiration-time: 86400000
+
+minio:
+  url: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket.name: documents
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

@@ -2,6 +2,7 @@ package com.deveshsharma.knowledgehub.exception;
 
 import com.deveshsharma.knowledgehub.dto.response.ErrorResponse;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidCreditionals;
+import com.deveshsharma.knowledgehub.exception.exceptions.InvalidAccessTokenException;
 import com.deveshsharma.knowledgehub.exception.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidAccessTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAccessToken(InvalidAccessTokenException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "Invalid access token",
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 
     /**
      * Handles attempts to register an existing email address.

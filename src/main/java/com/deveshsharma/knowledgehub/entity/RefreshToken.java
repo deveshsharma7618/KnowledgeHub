@@ -1,6 +1,12 @@
 package com.deveshsharma.knowledgehub.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,6 +16,11 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "refresh_tokens")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class RefreshToken {
 
     @Id
@@ -25,8 +36,9 @@ public class RefreshToken {
     @Column(nullable = false)
     private Instant expiresAt;
 
-    private Instant revokedAt;
+    private Instant revokedAt = null;
 
     @Column(nullable = false, updatable = false)
+    @CreationTimestamp
     private Instant createdAt;
 }

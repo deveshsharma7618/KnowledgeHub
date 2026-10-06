@@ -1,6 +1,8 @@
 package com.deveshsharma.knowledgehub.security;
 
-import com.deveshsharma.knowledgehub.service.JwtService;
+import com.deveshsharma.knowledgehub.exception.exceptions.InvalidAccessTokenException;
+import com.deveshsharma.knowledgehub.service.JwtTokenService;
+import com.deveshsharma.knowledgehub.service.TokenHashService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +14,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.JwtException;
 
 import java.io.IOException;
 
@@ -22,8 +27,11 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    private final JwtTokenService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TokenHashService tokenHashService;
+    private final StringRedisTemplate redisTemplate;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     /**
      * Creates a JWT authentication filter.
@@ -31,9 +39,16 @@ public class JwtFilter extends OncePerRequestFilter {
      * @param jwtService JWT parsing and validation service
      * @param userDetailsService user lookup service
      */
-    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtFilter(JwtTokenService jwtService,
+                     UserDetailsService userDetailsService,
+                     TokenHashService tokenHashService,
+                     StringRedisTemplate redisTemplate,
+                     HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.tokenHashService = tokenHashService;
+        this.redisTemplate = redisTemplate;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     /**
@@ -57,17 +72,31 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String username = jwtService.extractUsername(jwt);
+        try {
+            String cacheKey = "access-token:" + tokenHashService.hash(jwt);
+            if (!Boolean.TRUE.equals(redisTemplate.hasKey(cacheKey))) {
+                throw new InvalidAccessTokenException();
+            }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            final String username = jwtService.extractUsername(jwt);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(jwt, userDetails, "access_token")) {
+                if (!jwtService.isTokenValid(jwt, userDetails, "access_token")) {
+                    throw new InvalidAccessTokenException();
+                }
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+        } catch (InvalidAccessTokenException | JwtException | IllegalArgumentException ex) {
+            handlerExceptionResolver.resolveException(request, response, null,
+                    ex instanceof InvalidAccessTokenException
+                            ? ex
+                            : new InvalidAccessTokenException(ex));
+            return;
         }
         filterChain.doFilter(request, response);
     }

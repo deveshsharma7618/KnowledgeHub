@@ -7,15 +7,20 @@ import com.deveshsharma.knowledgehub.entity.User;
 import com.deveshsharma.knowledgehub.entity.enums.UserStatus;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidCreditionals;
 import com.deveshsharma.knowledgehub.exception.exceptions.UserAlreadyExistsException;
+import com.deveshsharma.knowledgehub.repository.RefreshTokenRepository;
 import com.deveshsharma.knowledgehub.repository.UserRepository;
+import com.deveshsharma.knowledgehub.service.impl.AuthServiceImpl;
+import com.deveshsharma.knowledgehub.service.impl.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,15 +35,33 @@ class AuthServiceTest {
 
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
+    private RefreshTokenRepository refreshTokenRepository;
     private JwtService jwtService;
+    private TokenHashService tokenHashService;
+    private StringRedisTemplate redisTemplate;
     private AuthService authService;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
+        refreshTokenRepository = mock(RefreshTokenRepository.class);
         jwtService = mock(JwtService.class);
-        authService = new AuthService(userRepository, passwordEncoder, jwtService);
+        tokenHashService = mock(TokenHashService.class);
+        redisTemplate = mock(StringRedisTemplate.class);
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        authService = new AuthServiceImpl(
+                userRepository,
+                refreshTokenRepository,
+                passwordEncoder,
+                jwtService,
+                tokenHashService,
+                redisTemplate
+        );
+        when(tokenHashService.hash(any(String.class))).thenReturn("hash");
+        when(jwtService.extractExpiration(any(String.class))).thenReturn(Instant.now().plusSeconds(60));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     /**

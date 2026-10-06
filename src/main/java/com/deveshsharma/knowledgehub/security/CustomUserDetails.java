@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * Adapts a domain user to Spring Security's user-details contract.
@@ -75,5 +76,9 @@ public record CustomUserDetails(User user) implements UserDetails {
     @Override
     public boolean isEnabled() {
         return user.getStatus() == UserStatus.ACTIVE;
+    }
+
+    public UUID getUserId() {
+        return user.getId();
     }
 }
