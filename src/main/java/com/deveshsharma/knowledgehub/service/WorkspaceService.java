@@ -12,4 +12,7 @@ public interface WorkspaceService {
     WorkspaceDetailsResponse find(UUID workspaceId);
     WorkspaceDetailsResponse update(UUID workspaceId, UpdateWorkspaceRequest request);
     void delete(UUID workspaceId);
+    void addMember(UUID workspaceId, UUID userId);
+    void leave(UUID workspaceId);
+    void removeMember(UUID workspaceId, UUID userId);
 }

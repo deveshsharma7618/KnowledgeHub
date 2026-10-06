@@ -1,5 +1,6 @@
 package com.deveshsharma.knowledgehub.service.impl;
 
+import com.deveshsharma.knowledgehub.constants.JwtConstants;
 import com.deveshsharma.knowledgehub.dto.request.LoginRequest;
 import com.deveshsharma.knowledgehub.dto.request.SignUpRequest;
 import com.deveshsharma.knowledgehub.dto.response.AuthResponse;
@@ -117,18 +118,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public AuthResponse refresh(String refreshToken, String accessToken) {
+    public AuthResponse refresh(String refreshToken) {
         User user = validateRefreshToken(refreshToken);
         revokeRefreshToken(refreshToken);
-        revokeAccessToken(accessToken);
+        redisTemplate.delete(JwtConstants.ACCESS_TOKEN + ":" + user.getEmail());
         return issueTokens(user);
     }
 
     @Transactional
     @Override
-    public void logout(String refreshToken, String accessToken) {
+    public void logout(String refreshToken) {
         revokeRefreshToken(refreshToken);
-        revokeAccessToken(accessToken);
+        redisTemplate.delete(JwtConstants.ACCESS_TOKEN + ":" + jwtService.extractUsername(refreshToken));
     }
 
     @NonNull
@@ -149,8 +150,8 @@ public class AuthServiceImpl implements AuthService {
         Instant accessExpiresAt = jwtService.extractExpiration(accessToken);
         Duration accessTokenTtl = Duration.between(now, accessExpiresAt);
         redisTemplate.opsForValue().set(
-                "access-token:" + tokenHashService.hash(accessToken),
-                savedUser.getEmail(),
+                JwtConstants.ACCESS_TOKEN + ":" + savedUser.getEmail(),
+                tokenHashService.hash(accessToken),
                 accessTokenTtl
         );
 
@@ -170,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
             }
             User user = userRepository.findById(savedToken.getUserId())
                     .orElseThrow(InvalidRefreshTokenException::new);
-            if (!jwtService.isTokenValid(refreshToken, new CustomUserDetails(user), "refresh_token")) {
+            if (!jwtService.isTokenValid(refreshToken, new CustomUserDetails(user), JwtConstants.REFRESH_TOKEN)) {
                 throw new InvalidRefreshTokenException();
             }
             return user;
@@ -189,12 +190,5 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepository.save(savedToken);
     }
 
-    private void revokeAccessToken(String accessToken) {
-        if (accessToken == null || accessToken.isBlank()) {
-            return;
-        }
-        String token = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        redisTemplate.delete("access-token:" + tokenHashService.hash(token));
-    }
 
 }

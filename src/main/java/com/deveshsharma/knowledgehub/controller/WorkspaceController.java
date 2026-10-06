@@ -2,6 +2,7 @@ package com.deveshsharma.knowledgehub.controller;
 
 
 import com.deveshsharma.knowledgehub.dto.request.CreateWorkspaceRequest;
+import com.deveshsharma.knowledgehub.dto.request.AddWorkspaceMemberRequest;
 
 import com.deveshsharma.knowledgehub.dto.response.WorkspaceResponse;
 import com.deveshsharma.knowledgehub.service.DocumentService;
@@ -64,6 +65,31 @@ public class WorkspaceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWorkspace(@PathVariable UUID workspaceId) {
         workspaceService.delete(workspaceId);
+    }
+
+    @PostMapping("/{workspaceId}/members")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addMember(@PathVariable UUID workspaceId,
+                          @Valid @RequestBody AddWorkspaceMemberRequest request) {
+        workspaceService.addMember(workspaceId, request.userId());
+    }
+
+    @PostMapping("/{workspaceId}/members/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addMember(@PathVariable UUID workspaceId, @PathVariable UUID userId) {
+        workspaceService.addMember(workspaceId, userId);
+    }
+
+    @DeleteMapping("/{workspaceId}/members/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveWorkspace(@PathVariable UUID workspaceId) {
+        workspaceService.leave(workspaceId);
+    }
+
+    @DeleteMapping("/{workspaceId}/members/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeMember(@PathVariable UUID workspaceId, @PathVariable UUID userId) {
+        workspaceService.removeMember(workspaceId, userId);
     }
 
     @PostMapping("/{workspaceId}/documents")

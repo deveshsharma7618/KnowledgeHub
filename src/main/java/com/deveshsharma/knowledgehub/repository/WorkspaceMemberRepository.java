@@ -1,0 +1,14 @@
+package com.deveshsharma.knowledgehub.repository;
+
+import com.deveshsharma.knowledgehub.entity.WorkspaceMember;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember, UUID> {
+    boolean existsByWorkspaceIdAndUserId(UUID workspaceId, UUID userId);
+    Optional<WorkspaceMember> findByWorkspaceIdAndUserId(UUID workspaceId, UUID userId);
+    void deleteByWorkspaceIdAndUserId(UUID workspaceId, UUID userId);
+    void deleteByWorkspaceId(UUID workspaceId);
+}

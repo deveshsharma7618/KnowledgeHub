@@ -2,6 +2,12 @@ package com.deveshsharma.knowledgehub.entity;
 
 import com.deveshsharma.knowledgehub.entity.enums.WorkspaceRole;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +26,11 @@ import java.util.UUID;
                 )
         }
 )
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class WorkspaceMember {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,5 +47,6 @@ public class WorkspaceMember {
     private WorkspaceRole role;
 
     @Column(nullable = false, updatable = false)
+    @CreationTimestamp
     private Instant joinedAt;
 }

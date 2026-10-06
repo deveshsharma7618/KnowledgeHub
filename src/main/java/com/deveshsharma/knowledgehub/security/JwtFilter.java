@@ -1,5 +1,6 @@
 package com.deveshsharma.knowledgehub.security;
 
+import com.deveshsharma.knowledgehub.constants.JwtConstants;
 import com.deveshsharma.knowledgehub.exception.exceptions.InvalidAccessTokenException;
 import com.deveshsharma.knowledgehub.service.JwtTokenService;
 import com.deveshsharma.knowledgehub.service.TokenHashService;
@@ -73,16 +74,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String jwt = authHeader.substring(7);
         try {
-            String cacheKey = "access-token:" + tokenHashService.hash(jwt);
-            if (!Boolean.TRUE.equals(redisTemplate.hasKey(cacheKey))) {
+            final String username = jwtService.extractUsername(jwt);
+            String cacheKey = JwtConstants.ACCESS_TOKEN + ":" + username;
+            if (!tokenHashService.hash(jwt).equals(redisTemplate.opsForValue().get(cacheKey))) {
                 throw new InvalidAccessTokenException();
             }
 
-            final String username = jwtService.extractUsername(jwt);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-                if (!jwtService.isTokenValid(jwt, userDetails, "access_token")) {
+                if (!jwtService.isTokenValid(jwt, userDetails, JwtConstants.ACCESS_TOKEN)) {
                     throw new InvalidAccessTokenException();
                 }
 

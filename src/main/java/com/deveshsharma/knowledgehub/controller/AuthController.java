@@ -80,15 +80,14 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh tokens", description = "Rotates the supplied refresh token and revokes the current access token.")
+    @Operation(summary = "Refresh tokens", description = "Rotates the supplied refresh token.")
     @ApiResponse(responseCode = "200", description = "New authentication tokens returned")
     @ApiResponse(responseCode = "401", description = "Invalid, expired, or revoked refresh token",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @SecurityRequirements
     public AuthResponse refresh(
-            @Valid @RequestBody RefreshTokenRequest request,
-            @RequestHeader("Authorization") String authorizationHeader) {
-        return authService.refresh(request.getRefreshToken(), authorizationHeader);
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return authService.refresh(request.getRefreshToken());
     }
 
     @PostMapping("/logout")
@@ -99,9 +98,8 @@ public class AuthController {
     @SecurityRequirements
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(
-            @Valid @RequestBody RefreshTokenRequest request,
-            @RequestHeader("Authorization") String authorizationHeader) {
-        authService.logout(request.getRefreshToken(), authorizationHeader);
+            @Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request.getRefreshToken());
     }
 
 }
